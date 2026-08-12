@@ -23,3 +23,18 @@ ruleset）で強制しようとしたが、非公開リポジトリでは GitHub
 で回避できる — これは Git 標準機能であり、フック自体では防げない。
 真の強制が必要になったら、リポジトリを Public にするか GitHub Pro に
 アップグレードして ruleset を使う。
+
+## 2026-08-12: CSP の `script-src` に `unsafe-inline` を許可する
+
+**背景**: `checklists/release.md` SEC-92「`unsafe-inline` を避けている」を満たすため、
+`next.config.ts` で `script-src 'self'` を試した。
+
+**決定**: `script-src 'self' 'unsafe-inline'` を採用する。
+
+**理由**: `next build && next start` の状態で Playwright を使って実測したところ、
+`unsafe-inline` を外すと Next.js が RSC のペイロードを渡すために注入するインラインscriptが
+CSP違反でブロックされ、ハイドレーションが壊れた（`React error #412`、コンソールにCSP違反2件）。
+現時点ではペイロードに機微情報を含む機能（認証・決済等）が無いため、この妥協を許容する。
+
+**見直し条件**: 認証や決済など、XSS経由のインラインscript実行が実害に直結する機能を追加する
+タイミングで、`middleware.ts` によるnonceベースのCSPへ移行し、`unsafe-inline` を外す。
