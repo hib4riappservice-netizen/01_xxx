@@ -48,7 +48,9 @@ try {
   console.log(`差分: +${insertions} -${deletions}（生成コード/lockfileを除く）`)
 
   if (total > MAX_LINES) {
-    console.error(`❌ 差分が${MAX_LINES}行を超えています（${total}行）。G0に戻って分割してください（例外なし）`)
+    console.error(
+      `❌ 差分が${MAX_LINES}行を超えています（${total}行）。G0に戻って分割してください（例外なし）`,
+    )
     process.exit(1)
   }
 
