@@ -28,6 +28,15 @@ jobs:
       - run: pnpm format:check
       - run: pnpm test
       - run: pnpm build
+      # SEC-13: critical/high の未対応を残さない
+      - run: pnpm audit --audit-level=high
+      # SEC-11: 「設定したつもり」ではなく解決値を確認する
+      - run: pnpm check:release-age
+      # DoD G0 / checklists/feature.md: 生成コード・lockfileを除く差分400行以内（例外なし）
+      - if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          pnpm check:diff-size origin/${{ github.base_ref }}
 
   e2e:
     runs-on: ubuntu-latest
