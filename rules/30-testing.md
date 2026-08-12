@@ -136,10 +136,17 @@ flakyテストは、テストがない状態より悪い（信頼を壊し、赤
 E2Eは `next build && next start` を要し、フィードバックが遅い（[TEST-01](#test-01-テストの3層と配分must)
 で全体5分以内と定めている）。日常のイテレーションでは `verify` の速さを優先する。
 
-- **MUST** クリティカルパスに触れる変更、および[70-loop-engineering.md](70-loop-engineering.md)の
-  ループの停止条件には **`pnpm verify:full` を使う**。`verify` だけを停止条件にすると、
-  E2Eを一度も走らせずに「完了」と判定できてしまう。
+- **MUST** クリティカルパスに触れる変更には **`pnpm verify:full` を使う**。`verify` だけを
+  停止条件にすると、E2Eを一度も走らせずに「完了」と判定できてしまう。
 - **MUST** G3（リリース前）は常に `verify:full` 相当（CIの `test:e2e` ジョブ）で判定する。
+- **MUST** [70-loop-engineering.md](70-loop-engineering.md)のループでは、**turn単位の内部反復**と
+  **マージ前のゲート**を区別する。turn単位は対象を絞った高速なテスト（例:
+  `pnpm test <file>`）でよいが、**マージする前には必ずCI全体（`verify:full`相当）を通す**。
+  内部反復まで`verify:full`にすると、E2Eの遅さ（[TEST-01](#test-01-テストの3層と配分must)）が
+  turn上限（[70-loop-engineering.md](70-loop-engineering.md) LOOP-01）を圧迫する。
+  （2026-08-13追記: 初版は全ての停止条件に`verify:full`を要求しており、実際の
+  最初のループ実行〔`docs/specs/parse-shortstat.md`〕がこれに反する形になった。
+  ループの内部反復とマージゲートは別物として整理し直した）
 
 ---
 
