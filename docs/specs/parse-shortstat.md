@@ -36,4 +36,13 @@
 
 ## 満たせなかった条件
 
-（実装後に記入）
+- 停止条件は `pnpm test tests/parse-shortstat.test.ts`（対象ファイルに絞ったユニットテスト）のみを
+  使い、`pnpm verify:full`（当時の`30-testing.md` TEST-07 MUSTが要求していた形）は使わなかった。
+  ただしマージ前にはPR #7のCIで`verify`と`test:e2e`が実際に緑であることを確認している。
+  この乖離は監査（loop-auditor-2、指摘D-1）で発覚し、TEST-07とLOOP-01の記述を
+  「turn単位の内部反復」と「マージ前のゲート」に分けて整理し直した
+  （`rules/30-testing.md`・`rules/70-loop-engineering.md` 2026-08-13更新分）。
+- turnごとの証拠（赤の実行結果・緑の実行結果）を個別のコミットやログとして残さず、
+  1コミットのメッセージに散文でまとめた。LOOP-03 MUST「証拠を示す」の運用として
+  不十分だった（監査 loop-auditor-2 指摘D-2）。以降のループでは turnごとにコミットを
+  分けるか、実行ログをファイルに残す。
