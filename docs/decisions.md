@@ -38,3 +38,21 @@ CSP違反でブロックされ、ハイドレーションが壊れた（`React e
 
 **見直し条件**: 認証や決済など、XSS経由のインラインscript実行が実害に直結する機能を追加する
 タイミングで、`middleware.ts` によるnonceベースのCSPへ移行し、`unsafe-inline` を外す。
+
+## 2026-08-13: GitHub branch ruleset で main を保護する（ローカルフックから移行）
+
+**背景**: 2026-08-12の決定で「非公開リポジトリではGitHub Pro必須のため、
+`.githooks/pre-commit`で代替する」とした。その後リポジトリを公開に変更した。
+
+**決定**: `protect-main` ruleset（`pull_request`必須・`deletion`禁止・`non_fast_forward`禁止）を
+作成した。**サーバー側への直接pushを実際に試し、`GH013: Repository rule violations`で
+拒否されることを実測確認済み。**
+
+**理由**: 公開リポジトリになった時点で、2026-08-12の決定が記録した「見直し条件」
+（Publicにするか GitHub Pro にアップグレードする）が満たされたのに、
+しばらく対応されていなかった（別セッションの監査で指摘された）。
+ローカルフック（`.githooks/pre-commit`）は`--no-verify`で回避できる弱い防御であり、
+サーバー側の強制に置き換えられるなら置き換えるべき。
+
+**`.githooks/pre-commit` は残す。** ruleset は「PRを経由すること」は強制するが、
+ローカルの早期フィードバック（コミット前に気づく）の価値は別にあるため。
