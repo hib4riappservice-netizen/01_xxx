@@ -28,13 +28,15 @@ DoD の MUST を変更したら、同じPRでこのリストも更新するこ�
 ## セキュリティ — 本番設定（A02）
 
 `pnpm check:headers <URL>` で SEC-90/92/98 を機械判定する（`scripts/check-headers.mjs`。
-`URL` を省略すると `http://localhost:3000`）。**本番/ステージングのURLに対して実行すること**
-（`http://localhost` に対する実行では HSTS 系が SKIP になり、判定を代替しない）。
+`URL` を省略すると `http://localhost:3000`）。CIの`headers`ジョブが`localhost`に対して
+自動実行する（HSTS系はSKIP）。**HSTS等の本番限定項目は、本番/ステージングURLに対して
+手動で一度は実行すること**（`http://localhost` に対する実行では代替しない）。
 
 - [ ] `NODE_ENV=production`、デバッグ / 詳細エラー表示が無効〔SEC-90〕 `[自動]`
 - [ ] HTTPS 強制、HSTS 有効〔SEC-91〕 `[自動]`（要 https ターゲット。localhostではSKIP表示になる）
 - [ ] `Content-Security-Policy` 設定済み（`unsafe-eval`・ワイルドカードを含まない）〔SEC-92〕 `[自動]`
-      （`unsafe-inline` は `docs/decisions.md` 記載の許容例外。SEC-64のStripe.js例外と同様の扱い）
+      （`unsafe-inline` は `docs/decisions.md` 記載の許容例外。SEC-64のStripe.js例外と同様の扱い。
+      `script-src`未指定時は`default-src`にフォールバックする判定に修正済み）
 - [ ] `Strict-Transport-Security: max-age=63072000; includeSubDomains`〔SEC-92〕 `[自動]`（要 https ターゲット）
 - [ ] `X-Content-Type-Options: nosniff`〔SEC-92〕 `[自動]`
 - [ ] `Referrer-Policy: strict-origin-when-cross-origin`〔SEC-92〕 `[自動]`
@@ -49,7 +51,7 @@ DoD の MUST を変更したら、同じPRでこのリストも更新するこ�
 
 ## セキュリティ — シークレット（A02）
 
-- [ ] `.env*` が `.gitignore` 済み〔SEC-99〕 `[自動]`（`.gitignore`、実測確認済み）
+- [ ] `.env*` が `.gitignore` 済み〔SEC-99〕 `[自動]`（`pnpm check:ci-hygiene`。CIに接続済み）
 - [ ] **リポジトリの履歴にもシークレットがない**（gitleaks 等で確認）〔SEC-99〕 `[要自動化]`（gitleaks未導入）
 - [ ] `NEXT_PUBLIC_` の変数に秘密が入っていない〔SEC-100〕 `[要自動化]`（変数名パターンでの一次検査は可能。最終判断は人間）
 - [ ] `process.env` へのアクセスが DAL / 設定モジュールに限られている〔SEC-101〕 `[要自動化]`
@@ -65,8 +67,10 @@ DoD の MUST を変更したら、同じPRでこのリストも更新するこ�
 - [ ] 追加した依存について、PR本文に 週間DL数 / 最終公開日 / 直接依存数 を記載した〔SEC-12〕 `[人間]`
 - [ ] `pnpm audit` に **critical / high の未対応がない**（例外は理由を記録）〔SEC-13〕 `[自動]`
       （`.github/workflows/ci.yml` の `pnpm audit --audit-level=high`）
-- [ ] GitHub Actions がコミットSHAでピン留めされている〔SEC-16〕 `[自動]`（`.github/workflows/ci.yml`、実測確認済み）
-- [ ] Actions の `permissions:` が最小化されている〔SEC-16〕 `[自動]`（`permissions: contents: read`）
+- [ ] GitHub Actions がコミットSHAでピン留めされている〔SEC-16〕 `[自動]`
+      （`pnpm check:ci-hygiene`。CIに接続済み。`@v5`のようなタグに戻して赤、
+      SHAに戻して緑になることを実測確認済み）
+- [ ] Actions の `permissions:` が最小化されている〔SEC-16〕 `[自動]`（同上）
 
 ## セキュリティ — アプリケーション（A01 / A06 / A07 / A08）
 

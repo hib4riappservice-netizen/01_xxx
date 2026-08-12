@@ -44,11 +44,18 @@ async function main() {
     (() => {
       const csp = h.get('content-security-policy')
       if (!csp) return false
-      const scriptSrc = csp.split(';').find((d) => d.trim().startsWith('script-src')) ?? ''
+      const directives = csp.split(';').map((d) => d.trim())
+      const scriptSrcDirective = directives.find((d) => d.startsWith('script-src'))
+      // CSP仕様上、script-src が無指定なら default-src にフォールバックする。
+      // find結果が無いのを「制限なし」と誤判定していた（監査 loop-auditor-2 指摘C-1）。
+      const effectiveScriptSrc =
+        scriptSrcDirective ?? directives.find((d) => d.startsWith('default-src')) ?? ''
       // 'unsafe-inline' は docs/decisions.md (2026-08-12) に記録済みの許容例外。
       // RSCのペイロード注入がインラインscriptを要求するため。SEC-64のStripe.js例外と同じ扱い。
       // ただし 'unsafe-eval' と '*' は許容しない — これらは事故時の被害が段違いに大きい。
-      return !!csp && !scriptSrc.includes('unsafe-eval') && !scriptSrc.includes('*')
+      return (
+        !!csp && !effectiveScriptSrc.includes('unsafe-eval') && !effectiveScriptSrc.includes('*')
+      )
     })(),
     h.get('content-security-policy'),
   )

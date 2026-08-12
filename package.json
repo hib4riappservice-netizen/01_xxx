@@ -18,7 +18,8 @@
     "verify:full": "pnpm verify && pnpm test:e2e",
     "check:headers": "node scripts/check-headers.mjs",
     "check:release-age": "node scripts/check-release-age.mjs",
-    "check:diff-size": "node scripts/check-diff-size.mjs"
+    "check:diff-size": "node scripts/check-diff-size.mjs",
+    "check:ci-hygiene": "node scripts/check-ci-hygiene.mjs"
   },
   "dependencies": {
     "next": "16.3.0",

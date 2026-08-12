@@ -39,6 +39,34 @@ jobs:
       # DoD G0 / checklists/feature.md: 生成コード・lockfileを除く差分400行以内（例外なし）
       - if: github.event_name == 'pull_request'
         run: pnpm check:diff-size origin/${{ github.base_ref }}
+      # SEC-99/SEC-16: .gitignore・Actionsのピン留め・permissions最小化を機械判定する
+      # （以前 [自動] タグが付いていたが判定する機械が無かった。監査 loop-auditor-2 指摘B-1で発覚）
+      - run: pnpm check:ci-hygiene
+
+  headers:
+    runs-on: ubuntu-latest
+    needs: verify
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      # SEC-90/92/98: 以前 [自動] タグが付いていたがCIに未接続だった
+      # （監査 loop-auditor-2 指摘B-2で発覚）。wait-on等の追加依存を足さず、
+      # シェルのリトライループで起動を待つ（CLAUDE.md「10行で書けないか」）
+      - run: |
+          pnpm start &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3000/ > /dev/null && break
+            sleep 1
+          done
+          pnpm check:headers
+        env:
+          NODE_ENV: production
 
   e2e:
     runs-on: ubuntu-latest
