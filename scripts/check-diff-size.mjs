@@ -3,6 +3,7 @@
 // 「生成コードと lockfile を除く差分が400行以内」を機械判定する。
 // 使い方: node scripts/check-diff-size.mjs [BASE_REF]  (既定 origin/main)
 import { execFileSync } from 'node:child_process'
+import { parseShortstat } from '../lib/parse-shortstat.ts'
 
 const MAX_LINES = 400
 const baseRef = process.argv[2] ?? process.env.DIFF_BASE_REF ?? 'origin/main'
@@ -41,8 +42,7 @@ try {
     process.exit(0)
   }
 
-  const insertions = Number(statOutput.match(/(\d+) insertions?/)?.[1] ?? 0)
-  const deletions = Number(statOutput.match(/(\d+) deletions?/)?.[1] ?? 0)
+  const { insertions, deletions } = parseShortstat(statOutput)
   const total = insertions + deletions
 
   console.log(`差分: +${insertions} -${deletions}（生成コード/lockfileを除く）`)
