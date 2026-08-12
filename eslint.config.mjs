@@ -8,7 +8,7 @@ const eslintConfig = defineConfig([
   ...nextTs,
 
   // TS-01 (MUST): any を使わない。@ts-ignore ではなく @ts-expect-error + 理由。
-  // 上流 (eslint-config-next/typescript) の既定値に依存せず、ここで確定させる。
+  // as unknown as T は禁止。上流の既定値に依存せず、ここで確定させる。
   {
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
@@ -19,6 +19,13 @@ const eslintConfig = defineConfig([
           'ts-ignore': true,
           'ts-nocheck': true,
           minimumDescriptionLength: 10,
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'TSAsExpression > TSAsExpression',
+          message: 'as unknown as T は禁止 (TS-01)。型アサーションの前に検証を入れる。',
         },
       ],
     },
