@@ -87,6 +87,9 @@ flakyテストは、テストがない状態より悪い（信頼を壊し、赤
 - カバレッジは **指標であって目標ではない**。数字合わせのテストを書かない。
 - 目安: `data/`（DAL）と `lib/`（ドメインロジック）は **80%以上**。UI層には数値目標を置かない。
 - カバレッジが低い箇所より、**「認可のテストがない箇所」を先に潰す**。
+- **`data/` が生まれた時点で**、CIにカバレッジしきい値のジョブを追加する（SHOULDのまま。
+  数値を強制すると数字合わせのテストを誘発するため、閾値割れはブロックではなく可視化に留める）。
+  それまでは対象コードが存在しないため、この項目は判定不能として扱う。
 
 ---
 
@@ -121,12 +124,22 @@ flakyテストは、テストがない状態より悪い（信頼を壊し、赤
     "test:watch": "vitest",
     "test:e2e":   "playwright test",
     "build":      "next build",
-    "verify":     "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm build"
+    "verify":     "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm build",
+    "verify:full": "pnpm verify && pnpm test:e2e"
   }
 }
 ```
 
 `pnpm verify` が **G1 ゲートの実体**。これが緑でない状態を「実装完了」と呼ばない。
+
+**`pnpm verify` に `test:e2e` を含めない（MUST の理由がある非対称）。**
+E2Eは `next build && next start` を要し、フィードバックが遅い（[TEST-01](#test-01-テストの3層と配分must)
+で全体5分以内と定めている）。日常のイテレーションでは `verify` の速さを優先する。
+
+- **MUST** クリティカルパスに触れる変更、および[70-loop-engineering.md](70-loop-engineering.md)の
+  ループの停止条件には **`pnpm verify:full` を使う**。`verify` だけを停止条件にすると、
+  E2Eを一度も走らせずに「完了」と判定できてしまう。
+- **MUST** G3（リリース前）は常に `verify:full` 相当（CIの `test:e2e` ジョブ）で判定する。
 
 ---
 

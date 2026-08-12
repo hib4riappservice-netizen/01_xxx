@@ -21,9 +21,11 @@ rules/
 ├── 40-frontend-ux.md            パフォーマンス・アクセシビリティ・UX
 ├── 50-japan-compliance.md       日本の法令（PP / 外部送信 / 特商法 …）
 ├── 60-delivery-ops.md           CI・リリース・運用・インシデント
+├── 70-loop-engineering.md       無人ループの4要素とMUST（LOOP-01〜05）
 ├── checklists/
 │   ├── feature.md               機能完成時（G2）
-│   └── release.md               リリース前（G3）
+│   ├── release.md               リリース前（G3）
+│   └── human.md                 上記から「人間確認のみ」を抽出した集約表
 └── sources/                     一次調査ソースと根拠
 ```
 
@@ -51,6 +53,10 @@ cp rules/CLAUDE.md ./CLAUDE.md
 
 ```
 G0 着手前     受け入れ条件を Given/When/Then で書く。計画に合意する（plan mode）
+              docs/specs/<slug>.md に永続化する
+   ↓
+  (無人ループで実行する場合のみ、ここに G-L が挟まる。
+   停止条件・turn上限・作業場を先に決める。70-loop-engineering.md)
    ↓
 G1 実装中     pnpm verify が緑になるまでが「実装中」
    ↓
@@ -85,6 +91,8 @@ DORA 2025 の調査によれば、AI支援開発は**スループットと正の
 **人間の注意力を前提にした基準は必ず破綻する。**
 このルール群が「型 → lint → テスト → CI」の順に落とすことを優先し、
 チェックリストを最後の手段に置いているのはこのため（[00-principles.md](00-principles.md) P6）。
+**同じ制約は、エージェントを無人ループで走らせるときにより強く効く**
+（[70-loop-engineering.md](70-loop-engineering.md)）。
 
 ### なぜセキュリティを厚くしているのか
 
