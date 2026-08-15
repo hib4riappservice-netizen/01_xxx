@@ -42,6 +42,14 @@ a {
   text-decoration: none;
 }
 
+/* A11Y-01 (MUST): タップ対象24x24px以上 (WCAG 2.2 target-size)。
+   上の `* { padding: 0; margin: 0 }` のリセットだけだと、素の<button>は
+   height 22px程度まで潰れて違反する（実測: 最初のサービスでaxe-coreが検出）。 */
+button {
+  min-height: 24px;
+  padding: 8px 16px;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
